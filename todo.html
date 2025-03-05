@@ -264,6 +264,7 @@
         #chart-container {
             width: 50%;
         }
+
         .green {
             color: darkgreen;
         }
@@ -311,17 +312,33 @@
 
             jsConfetti = new JSConfetti();
 
-            // Adiciona os itens iniciais
-            items.push({
-                text: "Gerar Script",
-                completed: false,
-                file: null
-            });
-            items.push({
-                text: "Gravar Vídeo",
-                completed: false,
-                file: null
-            });
+            // Função para salvar os itens no localStorage
+            function saveItems() {
+                localStorage.setItem('items', JSON.stringify(items));
+            }
+
+            // Função para carregar os itens do localStorage
+            function loadItems() {
+                const storedItems = localStorage.getItem('items');
+                if (storedItems) {
+                    items = JSON.parse(storedItems);
+                } else {
+                    // Se não houver itens no localStorage, adiciona os itens iniciais
+                    items.push({
+                        text: "Gerar Script",
+                        completed: false,
+                        file: null
+                    });
+                    items.push({
+                        text: "Gravar Vídeo",
+                        completed: false,
+                        file: null
+                    });
+                }
+            }
+
+            // Carrega os itens do localStorage
+            loadItems();
 
             // Inicializa a lista
             updateItemList();
@@ -338,6 +355,7 @@
                     updateItemList();
                     itemInput.value = '';
                     itemInput.focus();
+                    saveItems(); // Salva os itens no localStorage
                 }
             });
 
@@ -361,6 +379,7 @@
                         item.completed = this.checked;
                         updateItemList();
                         updateChart();
+                        saveItems(); // Salva os itens no localStorage
                     });
 
                     const itemTextSpan = document.createElement('span');
@@ -462,12 +481,14 @@
                 if (novoTexto !== null) {
                     items[index].text = novoTexto;
                     updateItemList();
+                    saveItems(); // Salva os itens no localStorage
                 }
             }
 
             function deleteItem(index) {
                 items.splice(index, 1);
                 updateItemList();
+                saveItems(); // Salva os itens no localStorage
             }
 
             function uploadFile(index) {
@@ -483,6 +504,7 @@
                         // Aqui você pode adicionar a lógica para fazer o upload do arquivo
                         items[index].file = file; // Salva o arquivo no item
                         updateItemList();
+                        saveItems(); // Salva os itens no localStorage
                     }
                 });
 
@@ -513,10 +535,6 @@
                     URL.revokeObjectURL(url);
                 }
             }
-
-            // Inicializa a lista e o gráfico ao carregar a página
-            updateItemList();
-            updateChart();
         });
     </script>
 
