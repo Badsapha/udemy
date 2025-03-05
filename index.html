@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Itens e Gráfico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            /* Permite rolagem na página */
+            overflow-y: auto;
+            /* Impede rolagem horizontal */
+            overflow-x: hidden;
+            min-height: 100vh;
+            /* Garante que a página tenha pelo menos a altura da tela */
+        }
+
+        #container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            /* Alinha os containers verticalmente */
+            min-height: 500px;
+        }
+
+        #list-container {
+            width: 50%;
+            /* Volta ao tamanho original */
+            padding-right: 20px;
+            border-right: 1px solid #eee;
+            /* Volta ao border original */
+            margin-bottom: 20px;
+            /* Espaçamento abaixo */
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        #chart-container {
+            width: 50%;
+            /* Volta ao tamanho original */
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #input-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        #item-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #add-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        #add-button:hover {
+            background-color: #3e8e41;
+        }
+
+        #item-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+        }
+
+        #item-list li {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        #item-list li:last-child {
+            border-bottom: none;
+        }
+
+        .item-text {
+            flex-grow: 1;
+        }
+
+        .item-actions {
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .item-actions button,
+        .item-actions i {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .item-actions button:hover,
+        .item-actions i:hover {
+            opacity: 0.7;
+        }
+
+        .edit-input {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        .editing {
+            display: flex;
+            align-items: center;
+        }
+
+        .editing .item-text {
+            display: none;
+        }
+
+        .completed {
+            color: green;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+
+        .progress-container {
+            width: 80%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #ccc;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, #a8e6cf, #4ac66f);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+            background-size: 200% 100%;
+            animation: progress-animation 2s linear infinite;
+        }
+
+        @keyframes progress-animation {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        #todo-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #todo-container h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #todo-input-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        #todo-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #todo-add-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        #todo-add-button:hover {
+            background-color: #3e8e41;
+        }
+
+        #todo-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        #todo-list li {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        #todo-list li:last-child {
+            border-bottom: none;
+        }
+
+        #todo-list li input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        #todo-list li span {
+            flex-grow: 1;
+        }
+
+        #todo-list li button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #todo-list li button:hover {
+            opacity: 0.7;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        #todo-chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #todo-percentage-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Estilos para o gráfico de linha */
+        #line-chart-container {
+            width: 100%;
+            /* Ocupa toda a largura da tela */
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #lineChart {
+            max-height: 300px;
+            width: 80%;
+            /* tamanho do chart */
+        }
+
+        #data-input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        #data-input-container div {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin-bottom: 10px;
+        }
+
+        #data-input-container label {
+            margin-right: 10px;
+        }
+
+        #data-input-container input,
+        #data-input-container select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            }
+
+        #add-data-button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        #add-data-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Garante que o gráfico de linha fique abaixo do gráfico de pizza */
+        #chart-container {
+            display: flex;
+            flex-direction: column;
+            /* Organiza os elementos verticalmente */
+            align-items: center;
+        }
+
+        /* Estilos para a tabela de correção */
+        #data-table {
+            width: 80%;
+            /* tamanho da tabela */
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #data-table th,
+        #data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #data-table th {
+            background-color: #f2f2f2;
+        }
+
+        #data-table .edit-button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #data-table .edit-button:hover {
+            background-color: #3e8e41;
+        }
+
+        .data {
+            width: 100%;
+            display: flex;
+        }
+
+        #list-container {
+            width: 50%;
+        }
+
+        #chart-container {
+            width: 50%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <div class="data">
+            <div id="list-container">
+                <h1>Lista de Itens</h1>
+
+                <div id="input-container">
+                    <input type="text" id="item-input" placeholder="Digite algo para adicionar">
+                    <button id="add-button">Adicionar</button>
+                </div>
+
+                <ol id="item-list">
+                </ol>
+            </div>
+
+            <div id="chart-container">
+                <h2>Cursos Prontos</h2>
+                <canvas id="pieChart"></canvas>
+                <div class="progress-container">
+                    <div class="progress-bar" id="completed-progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="line-chart-container">
+            <h2>Valor Ganho por Mês</h2>
+            <canvas id="lineChart"></canvas>
+
+            <div id="data-input-container">
+                <div>
+                    <label for="month">Mês:</label>
+                    <select id="month">
+                        <option value="Janeiro">Janeiro</option>
+                        <option value="Fevereiro">Fevereiro</option>
+                        <option value="Março">Março</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Maio">Maio</option>
+                        <option value="Junho">Junho</option>
+                        <option value="Julho">Julho</option>
+                        <option value="Agosto">Agosto</option>
+                        <option value="Setembro">Setembro</option>
+                        <option value="Outubro">Outubro</option>
+                        <option value="Novembro">Novembro</option>
+                        <option value="Dezembro">Dezembro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="value">Valor (USD):</label>
+                    <input type="number" id="value" placeholder="Digite o valor">
+                </div>
+                <button id="add-data-button">Adicionar Dados</button>
+            </div>
+
+            <!-- Tabela para corrigir valores -->
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Mês</th>
+                        <th>Valor (USD)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aqui serão inseridas as linhas da tabela -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Função para salvar os itens no localStorage
+            function saveItemsToLocalStorage() {
+                localStorage.setItem('savedItems', JSON.stringify(items));
+            }
+
+            // Código da Lista de Itens e Gráfico Pizza
+            const itemInput = document.getElementById('item-input');
+            const addButton = document.getElementById('add-button');
+            const itemList = document.getElementById('item-list');
+            const pieChartCanvas = document.getElementById('pieChart').getContext('2d');
+            const completedProgressBar = document.getElementById('completed-progress');
+
+            let items = [];
+            let pieChart;
+            let jsConfetti;
+
+            jsConfetti = new JSConfetti();
+
+            // Carrega os itens salvos do localStorage
+            const savedItems = localStorage.getItem('savedItems');
+            if (savedItems) {
+                items = JSON.parse(savedItems);
+            }
+
+            addButton.addEventListener('click', function() {
+                const itemText = itemInput.value.trim();
+                if (itemText !== '') {
+                    items.unshift({
+                        text: itemText,
+                        completed: false
+                    });
+                    updateItemList();
+                    itemInput.value = '';
+                    itemInput.focus();
+                    saveItemsToLocalStorage(); // Salva os itens após adicionar um novo
+                }
+            });
+
+            itemInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    addButton.click();
+                }
+            });
+
+            function updateItemList() {
+                itemList.innerHTML = '';
+
+                items.forEach((item, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.dataset.index = index;
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = item.completed;
+                    checkbox.addEventListener('change', function() {
+                        item.completed = this.checked;
+                        updateItemList();
+                        updateChart();
+                        saveItemsToLocalStorage(); // Salva os itens após alterar o checkbox
+                    });
+
+                    const itemTextSpan = document.createElement('span');
+                    itemTextSpan.classList.add('item-text');
+                    itemTextSpan.textContent = item.text;
+
+                    if (item.completed) {
+                        itemTextSpan.classList.add('completed');
+                    } else {
+                        itemTextSpan.classList.remove('completed');
+                    }
+
+                    const itemActions = document.createElement('div');
+                    itemActions.classList.add('item-actions');
+
+                    const newTabIcon = document.createElement('i');
+                    newTabIcon.classList.add('fas', 'fa-external-link-alt');
+                    newTabIcon.addEventListener('click', function() {
+                        // Abre uma nova aba com a URL dinâmica
+                        window.open(`todo.html?item=${encodeURIComponent(item.text)}`, '_blank');
+                    });
+
+                    const editButton = document.createElement('button');
+                    editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                    editButton.addEventListener('click', () => editItem(index));
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                    deleteButton.addEventListener('click', () => deleteItem(index));
+
+                    itemActions.appendChild(checkbox);
+                    itemActions.appendChild(newTabIcon);
+                    itemActions.appendChild(editButton);
+                    itemActions.appendChild(deleteButton);
+
+                    listItem.appendChild(itemTextSpan);
+                    listItem.appendChild(itemActions);
+
+                    itemList.appendChild(listItem);
+                });
+
+                updateChart();
+            }
+
+            function updateChart() {
+                let completedCount = items.filter(item => item.completed).length;
+                let totalCount = items.length;
+
+                let completedPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+                completedProgressBar.style.width = completedPercentage + '%';
+
+                if (completedPercentage === 100) {
+                    jsConfetti.addConfetti({
+                        emojis: ['🥳', '🎉', '🎊', '🎈'],
+                        emojiSize: 30,
+                        confettiNumber: 60,
+                    }).then(() => console.log('Confetti launched'));
+                }
+
+                if (pieChart) {
+                    pieChart.destroy();
+                }
+
+                pieChart = new Chart(pieChartCanvas, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Cursos Prontos', 'Cursos Incompletos'],
+                        datasets: [{
+                            data: [completedCount, totalCount - completedCount],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(255, 99, 132, 0.8)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            title: {
+                                display: false,
+                            }
+                        }
+                    }
+                });
+            }
+
+            function editItem(index) {
+                // Aqui você pode adicionar a lógica para editar o item no índice fornecido
+                const novoTexto = prompt("Digite o novo texto para o item:", items[index].text);
+                if (novoTexto !== null) {
+                    items[index].text = novoTexto;
+                    updateItemList();
+                    saveItemsToLocalStorage(); // Salva os itens após editar
+                }
+            }
+
+            function deleteItem(index) {
+                items.splice(index, 1);
+                updateItemList();
+                saveItemsToLocalStorage(); // Salva os itens após excluir
+            }
+
+            // Inicializa a lista e o gráfico ao carregar a página
+            updateItemList();
+            updateChart();
+
+            // Código do Gráfico de Linha
+            const lineChartCanvas = document.getElementById('lineChart').getContext('2d');
+            const monthSelect = document.getElementById('month');
+            const valueInput = document.getElementById('value');
+            const addDataButton = document.getElementById('add-data-button');
+            const dataTableBody = document.getElementById('data-table').querySelector('tbody');
+
+            let lineChart; // Variável para armazenar a instância do gráfico de linha
+
+            // Dados iniciais para o gráfico de linha
+            let lineChartData = {
+                labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                datasets: [{
+                    label: 'Valor Ganho (USD)',
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Valores iniciais zerados
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            };
+
+            // Função para criar/atualizar o gráfico de linha
+            function updateLineChart() {
+                if (lineChart) {
+                    lineChart.destroy();
+                }
+
+                lineChart = new Chart(lineChartCanvas, {
+                    type: 'line',
+                    data: lineChartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                updateDataTable(); // Atualiza a tabela após atualizar o gráfico
+            }
+
+            // Função para atualizar a tabela com os dados do gráfico
+            function updateDataTable() {
+                dataTableBody.innerHTML = ''; // Limpa a tabela
+
+                lineChartData.labels.forEach((month, index) => {
+                    const row = document.createElement('tr');
+
+                    const monthCell = document.createElement('td');
+                    monthCell.textContent = month;
+
+                    const valueCell = document.createElement('td');
+                    valueCell.textContent = lineChartData.datasets[0].data[index];
+
+                    const actionsCell = document.createElement('td');
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Editar';
+                    editButton.classList.add('edit-button'); // Adiciona classe para estilo
+                    editButton.addEventListener('click', () => editDataLineChart(index)); // Adiciona evento de clique
+                    actionsCell.appendChild(editButton);
+
+                    row.appendChild(monthCell);
+                    row.appendChild(valueCell);
+                    row.appendChild(actionsCell);
+                    dataTableBody.appendChild(row);
+                });
+            }
+
+            // Inicializa o gráfico de linha
+            updateLineChart();
+
+            // Evento de clique para adicionar dados ao gráfico de linha
+            addDataButton.addEventListener('click', function() {
+                const month = monthSelect.value;
+                const value = parseFloat(valueInput.value);
+
+                if (isNaN(value)) {
+                    alert('Por favor, digite um valor numérico.');
+                    return;
+                }
+
+                // Encontra o índice do mês selecionado
+                const monthIndex = lineChartData.labels.indexOf(month);
+
+                if (monthIndex !== -1) {
+                    // Atualiza o valor no array de dados
+                    lineChartData.datasets[0].data[monthIndex] = value;
+
+                    // Atualiza o gráfico
+                    updateLineChart();
+
+                    // Limpa o campo de entrada de valor
+                    valueInput.value = '';
+                }
+            });
+
+            // Função para editar os dados
+            function editDataLineChart(index) {
+                // Solicita um novo valor ao usuário
+                const newValue = prompt(`Digite o novo valor para ${lineChartData.labels[index]}:`, lineChartData.datasets[0].data[index]);
+
+                // Verifica se o valor é válido
+                if (newValue !== null) {
+                    const parsedValue = parseFloat(newValue);
+
+                    if (!isNaN(parsedValue)) {
+                        // Atualiza os dados com o novo valor
+                        lineChartData.datasets[0].data[index] = parsedValue;
+
+                        // Atualiza o gráfico e a tabela
+                        updateLineChart();
+                        updateDataTable();
+                    } else {
+                        alert('Valor inválido. Por favor, digite um número.');
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
