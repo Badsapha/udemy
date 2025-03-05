@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Itens e Gráfico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            /* Permite rolagem na página */
+            overflow-y: auto;
+            /* Impede rolagem horizontal */
+            overflow-x: hidden;
+            min-height: 100vh;
+            /* Garante que a página tenha pelo menos a altura da tela */
+        }
+
+        #container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            /* Alinha os containers horizontalmente */
+            min-height: 500px;
+        }
+
+        #list-container {
+            width: 50%;
+            /* Volta ao tamanho original */
+            padding-right: 20px;
+            border-right: 1px solid #eee;
+            /* Volta ao border original */
+            margin-bottom: 20px;
+            /* Espaçamento abaixo */
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        #chart-container {
+            width: 50%;
+            /* Volta ao tamanho original */
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #input-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        #item-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #add-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        #add-button:hover {
+            background-color: #3e8e41;
+        }
+
+        #item-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+        }
+
+        #item-list li {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        #item-list li:last-child {
+            border-bottom: none;
+        }
+
+        .item-text {
+            flex-grow: 1;
+        }
+
+        .item-actions {
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .item-actions button,
+        .item-actions i {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .item-actions button:hover,
+        .item-actions i:hover {
+            opacity: 0.7;
+        }
+
+        .edit-input {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        .editing {
+            display: flex;
+            align-items: center;
+        }
+
+        .editing .item-text {
+            display: none;
+        }
+
+        .completed {
+            color: green;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+
+        .progress-container {
+            width: 80%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #ccc;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, #a8e6cf, #4ac66f);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+            background-size: 200% 100%;
+            animation: progress-animation 2s linear infinite;
+        }
+
+        @keyframes progress-animation {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        #todo-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #todo-container h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #todo-input-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        #todo-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #todo-add-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        #todo-add-button:hover {
+            background-color: #3e8e41;
+        }
+
+        #todo-list li button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        #todo-list li button:hover {
+            opacity: 0.7;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        #todo-chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #todo-percentage-container {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .data {
+            width: 100%;
+            display: flex;
+        }
+
+        #list-container {
+            width: 50%;
+        }
+
+        #chart-container {
+            width: 50%;
+        }
+
+        .green {
+            color: darkgreen;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <div class="data">
+            <div id="list-container">
+                <h1>Lista de Itens</h1>
+
+                <div id="input-container">
+                    <input type="text" id="item-input" placeholder="Digite algo para adicionar">
+                    <button id="add-button">Adicionar</button>
+                </div>
+
+                <ol id="item-list">
+                </ol>
+            </div>
+
+            <div id="chart-container">
+                <h2>Cursos Prontos</h2>
+                <canvas id="pieChart"></canvas>
+                <div class="progress-container">
+                    <div class="progress-bar" id="completed-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Código da Lista de Itens e Gráfico Pizza
+            const itemInput = document.getElementById('item-input');
+            const addButton = document.getElementById('add-button');
+            const itemList = document.getElementById('item-list');
+            const pieChartCanvas = document.getElementById('pieChart').getContext('2d');
+            const completedProgressBar = document.getElementById('completed-progress');
+
+            let items = [];
+            let pieChart;
+            let jsConfetti;
+
+            jsConfetti = new JSConfetti();
+
+            // Função para salvar os itens no localStorage
+            function saveItems() {
+                localStorage.setItem('items', JSON.stringify(items));
+            }
+
+            // Função para carregar os itens do localStorage
+            function loadItems() {
+                const storedItems = localStorage.getItem('items');
+                if (storedItems) {
+                    items = JSON.parse(storedItems);
+                } else {
+                    // Se não houver itens no localStorage, adiciona os itens iniciais
+                    items.push({
+                        text: "Gerar Script",
+                        completed: false,
+                        file: null
+                    });
+                    items.push({
+                        text: "Gravar Vídeo",
+                        completed: false,
+                        file: null
+                    });
+                }
+            }
+
+            // Carrega os itens do localStorage
+            loadItems();
+
+            // Inicializa a lista
+            updateItemList();
+            updateChart();
+
+            addButton.addEventListener('click', function() {
+                const itemText = itemInput.value.trim();
+                if (itemText !== '') {
+                    items.unshift({
+                        text: itemText,
+                        completed: false,
+                        file: null
+                    });
+                    updateItemList();
+                    itemInput.value = '';
+                    itemInput.focus();
+                    saveItems(); // Salva os itens no localStorage
+                }
+            });
+
+            itemInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    addButton.click();
+                }
+            });
+
+            function updateItemList() {
+                itemList.innerHTML = '';
+
+                items.forEach((item, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.dataset.index = index;
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = item.completed;
+                    checkbox.addEventListener('change', function() {
+                        item.completed = this.checked;
+                        updateItemList();
+                        updateChart();
+                        saveItems(); // Salva os itens no localStorage
+                    });
+
+                    const itemTextSpan = document.createElement('span');
+                    itemTextSpan.classList.add('item-text');
+                    itemTextSpan.textContent = item.text;
+
+                    if (item.completed) {
+                        itemTextSpan.classList.add('completed');
+                    } else {
+                        itemTextSpan.classList.remove('completed');
+                    }
+
+                    const itemActions = document.createElement('div');
+                    itemActions.classList.add('item-actions');
+
+                    const uploadButton = document.createElement('button');
+                    uploadButton.innerHTML = `<i class="fas fa-upload ${item.file ? 'green' : ''}"></i>`; // Cor do ícone
+                    uploadButton.addEventListener('click', () => uploadFile(index));
+
+                    const downloadButton = document.createElement('button');
+                    downloadButton.innerHTML = '<i class="fas fa-download"></i>';
+                    downloadButton.disabled = !item.file; // Desabilita se não houver arquivo
+                    downloadButton.addEventListener('click', () => downloadFile(index));
+
+                    const editButton = document.createElement('button');
+                    editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                    editButton.addEventListener('click', () => editItem(index));
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                    deleteButton.addEventListener('click', () => deleteItem(index));
+
+                    itemActions.appendChild(checkbox);
+                    itemActions.appendChild(uploadButton);
+                    itemActions.appendChild(downloadButton);
+                    itemActions.appendChild(editButton);
+                    itemActions.appendChild(deleteButton);
+
+                    listItem.appendChild(itemTextSpan);
+                    listItem.appendChild(itemActions);
+
+                    itemList.appendChild(listItem);
+                });
+
+                updateChart();
+            }
+
+            function updateChart() {
+                let completedCount = items.filter(item => item.completed).length;
+                let totalCount = items.length;
+
+                let completedPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+                completedProgressBar.style.width = completedPercentage + '%';
+
+                if (completedPercentage === 100) {
+                    jsConfetti.addConfetti({
+                        emojis: ['🥳', '🎉', '🎊', '🎈'],
+                        emojiSize: 30,
+                        confettiNumber: 60,
+                    }).then(() => console.log('Confetti launched'));
+                }
+
+                if (pieChart) {
+                    pieChart.destroy();
+                }
+
+                pieChart = new Chart(pieChartCanvas, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Cursos Prontos', 'Cursos Incompletos'],
+                        datasets: [{
+                            data: [completedCount, totalCount - completedCount],
+                            backgroundColor: [
+                                'rgba(75, 192, 192, 0.8)',
+                                'rgba(255, 99, 132, 0.8)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            title: {
+                                display: false,
+                            }
+                        }
+                    }
+                });
+            }
+
+            function editItem(index) {
+                // Aqui você pode adicionar a lógica para editar o item no índice fornecido
+                const novoTexto = prompt("Digite o novo texto para o item:", items[index].text);
+                if (novoTexto !== null) {
+                    items[index].text = novoTexto;
+                    updateItemList();
+                    saveItems(); // Salva os itens no localStorage
+                }
+            }
+
+            function deleteItem(index) {
+                items.splice(index, 1);
+                updateItemList();
+                saveItems(); // Salva os itens no localStorage
+            }
+
+            function uploadFile(index) {
+                // Cria um input do tipo "file" dinamicamente
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+
+                // Adiciona um listener para quando um arquivo é selecionado
+                fileInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+
+                    if (file) {
+                        // Aqui você pode adicionar a lógica para fazer o upload do arquivo
+                        items[index].file = file; // Salva o arquivo no item
+                        updateItemList();
+                        saveItems(); // Salva os itens no localStorage
+                    }
+                });
+
+                // Simula um clique no input para abrir a janela de seleção de arquivo
+                fileInput.click();
+            }
+
+            function downloadFile(index) {
+                const item = items[index];
+
+                if (item.file) {
+                    // Cria um link para download
+                    const url = URL.createObjectURL(item.file);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = item.file.name; // Define o nome do arquivo
+
+                    // Adiciona o link ao corpo do documento
+                    document.body.appendChild(a);
+
+                    // Simula o clique no link para iniciar o download
+                    a.click();
+
+                    // Remove o link
+                    document.body.removeChild(a);
+
+                    // Revoga o objeto URL para liberar a memória
+                    URL.revokeObjectURL(url);
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
