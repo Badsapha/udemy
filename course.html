@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página do Curso</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f8f8f8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-content {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            border-right: 1px solid #eee;
+            padding-right: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 20px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            cursor: default;
+            background-color: white;
+        }
+
+        .item-text {
+            flex: 1;
+            word-break: break-all;
+            padding: 0 10px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .item-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            padding: 5px;
+        }
+
+        .edit-btn:hover {
+            color: #2196F3;
+        }
+
+        .delete-btn:hover {
+            color: #f44336;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            padding: 5px;
+        }
+        
+        .nav-btn:hover {
+            color: #FF9800;
+        }
+        
+        .add-subitem-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            padding: 5px;
+        }
+        
+        .add-subitem-btn:hover {
+            color: #4CAF50;
+        }
+        
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            padding: 5px;
+            margin-right: 5px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .toggle-btn:hover {
+            color: #333;
+        }
+        
+        .home-btn {
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .home-btn:hover {
+            background-color: #F57C00;
+        }
+
+        .status-inputs {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .status-input-small {
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+        }
+        
+        .status-input-large {
+            width: 100px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #8BC34A;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .chart-info {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+
+        .course-info {
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .course-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .course-description {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .subitem {
+            padding-left: 30px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .subitem-container {
+            margin-left: 20px;
+            border-left: 2px dotted #ddd;
+        }
+        
+        .add-subitem-form {
+            display: flex;
+            margin: 10px 0 10px 30px;
+        }
+        
+        .add-subitem-form input {
+            flex: 1;
+            border-radius: 5px 0 0 5px;
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        
+        .add-subitem-form button {
+            border-radius: 0 5px 5px 0;
+            padding: 8px 15px;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .course-notes {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+            margin-top: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .app-content {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+                padding-right: 0;
+                padding-bottom: 20px;
+                max-height: none;
+            }
+
+            .right-panel {
+                padding-left: 0;
+                padding-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="home-btn" onclick="window.location.href='index.html'">
+            🏠 Voltar para a página inicial
+        </button>
+        
+        <div class="course-info">
+            <h2 class="course-title" id="courseTitle">Informações do Curso</h2>
+            <p class="course-description" id="courseDescription">
+                Este é o detalhamento do curso selecionado. Aqui você pode ver informações detalhadas sobre o progresso, conteúdo e estatísticas do curso.
+            </p>
+            <textarea id="courseNotes" class="course-notes" placeholder="Anotações específicas para este curso..."></textarea>
+        </div>
+        
+        <div class="app-content">
+            <div class="left-panel">
+                <h2>Lista de Itens do Curso</h2>
+                <div class="input-container">
+                    <input type="text" id="newItem" placeholder="Digite algo para adicionar">
+                    <button id="addButton">Adicionar</button>
+                </div>
+                <div id="itemsList">
+                    <!-- Items will be dynamically added here -->
+                </div>
+            </div>
+            <div class="right-panel">
+                <h2>Progresso do Curso</h2>
+                <div class="chart-container">
+                    <canvas id="courseChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #4BC0C0;"></div>
+                        <span>Completos</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #FF6384;"></div>
+                        <span>Incompletos</span>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Variables
+        let selectedItemId = null;
+        let mainItem = null;
+        let courseItems = [];
+
+        // DOM Elements
+        const itemsList = document.getElementById('itemsList');
+        const newItemInput = document.getElementById('newItem');
+        const addButton = document.getElementById('addButton');
+        const progressBar = document.getElementById('progressBar');
+        const tooltip = document.getElementById('tooltip');
+        const courseTitle = document.getElementById('courseTitle');
+        const courseDescription = document.getElementById('courseDescription');
+        const courseNotes = document.getElementById('courseNotes');
+
+        // Chart initialization
+        let courseChart;
+        function initChart() {
+            const ctx = document.getElementById('courseChart').getContext('2d');
+            
+            courseChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Completos', 'Incompletos'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#4BC0C0', '#FF6384'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    return `${label}: ${value}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load the main items from index
+        function loadMainItems() {
+            const savedItems = localStorage.getItem('indexItems');
+            let allItems = [];
+            
+            if (savedItems) {
+                allItems = JSON.parse(savedItems);
+            }
+            
+            // Get the selected item ID
+            selectedItemId = parseInt(localStorage.getItem('selectedItemId'));
+            
+            if (selectedItemId) {
+                // Find the selected item
+                mainItem = allItems.find(item => item.id === selectedItemId);
+                
+                if (mainItem) {
+                    // Set up course info
+                    courseTitle.textContent = mainItem.text;
+                    courseDescription.textContent = `Informações detalhadas sobre ${mainItem.text}. Este curso está ${mainItem.completed ? 'completo' : 'incompleto'}.`;
+                    
+                    // Set up course items
+                    if (!mainItem.courseItems) {
+                        mainItem.courseItems = [];
+                    }
+                    courseItems = mainItem.courseItems;
+                    
+                    // Load course notes
+                    const savedNotes = localStorage.getItem(`courseNotes_${selectedItemId}`);
+                    if (savedNotes) {
+                        courseNotes.value = savedNotes;
+                    } else {
+                        courseNotes.value = mainItem.courseNotes || `Anotações para ${mainItem.text}`;
+                    }
+                }
+            }
+            
+            // If no item was found, use a default
+            if (!mainItem) {
+                courseTitle.textContent = "Curso não encontrado";
+                courseDescription.textContent = "Não foi possível encontrar informações para este curso.";
+            }
+        }
+
+        // Update chart with current data
+        function updateChart() {
+            let completedCourses = 0;
+            let totalCourses = courseItems.length;
+            
+            courseItems.forEach(item => {
+                if (item.completed) {
+                    completedCourses++;
+                }
+            });
+            
+            let incompleteCourses = totalCourses - completedCourses;
+            
+            courseChart.data.datasets[0].data = [completedCourses, incompleteCourses];
+            courseChart.update();
+            
+            // Update progress bar
+            const progressPercentage = totalCourses > 0 ? (completedCourses / totalCourses) * 100 : 0;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        // Save course items back to main storage
+        function saveCourseItems() {
+            if (!mainItem || !selectedItemId) return;
+            
+            // Load all items to update the specific one
+            const savedItems = localStorage.getItem('indexItems');
+            let allItems = [];
+            
+            if (savedItems) {
+                allItems = JSON.parse(savedItems);
+                
+                // Find and update the selected item
+                const itemIndex = allItems.findIndex(item => item.id === selectedItemId);
+                if (itemIndex !== -1) {
+                    allItems[itemIndex].courseItems = courseItems;
+                    localStorage.setItem('indexItems', JSON.stringify(allItems));
+                }
+            }
+            
+            // Save course notes separately
+            localStorage.setItem(`courseNotes_${selectedItemId}`, courseNotes.value);
+        }
+
+        // Toggle subitems visibility
+        function toggleSubitems(itemId) {
+            const item = courseItems.find(item => item.id === itemId);
+            if (item) {
+                item.collapsed = !item.collapsed;
+                saveCourseItems();
+                renderItems();
+            }
+        }
+
+        // Add a subitem to a parent item
+        function addSubitem(parentId, text) {
+            if (!text || text.trim() === '') return;
+            
+            const parentItem = courseItems.find(item => item.id === parentId);
+            if (!parentItem) return;
+            
+            if (!parentItem.subitems) {
+                parentItem.subitems = [];
+            }
+            
+            const newId = parentItem.subitems.length > 0 
+                ? Math.max(...parentItem.subitems.map(item => item.id)) + 1 
+                : 1;
+            
+            parentItem.subitems.push({
+                id: newId,
+                text: text,
+                completed: false,
+                editing: false
+            });
+            
+            // Initialize collapsed state if needed
+            if (parentItem.collapsed === undefined) {
+                parentItem.collapsed = false;
+            }
+            
+            saveCourseItems();
+            renderItems();
+        }
+
+        // Render the to-do list items
+        function renderItems() {
+            itemsList.innerHTML = '';
+            
+            courseItems.forEach((item) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item';
+                
+                // Toggle button for subitems
+                const toggleButton = document.createElement('button');
+                toggleButton.className = 'toggle-btn';
+                
+                if (item.subitems && item.subitems.length > 0) {
+                    toggleButton.innerHTML = item.collapsed ? '▶' : '▼';
+                    toggleButton.title = item.collapsed ? 'Expandir' : 'Recolher';
+                    toggleButton.addEventListener('click', () => toggleSubitems(item.id));
+                } else {
+                    toggleButton.innerHTML = '•';
+                    toggleButton.style.cursor = 'default';
+                }
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = item.completed;
+                checkbox.addEventListener('change', () => {
+                    item.completed = checkbox.checked;
+                    updateChart();
+                    renderItems();
+                    saveCourseItems();
+                });
+                
+                const itemText = document.createElement('div');
+                itemText.className = 'item-text';
+                
+                if (item.editing) {
+                    const editInput = document.createElement('input');
+                    editInput.type = 'text';
+                    editInput.value = item.text;
+                    editInput.style.width = '100%';
+                    editInput.addEventListener('keyup', (e) => {
+                        if (e.key === 'Enter') {
+                            item.text = editInput.value;
+                            item.editing = false;
+                            renderItems();
+                            saveCourseItems();
+                        }
+                    });
+                    itemText.appendChild(editInput);
+                    setTimeout(() => editInput.focus(), 0);
+                } else {
+                    itemText.textContent = item.text;
+                }
+                
+                const actionButtons = document.createElement('div');
+                actionButtons.className = 'item-actions';
+                
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '✎';
+                editButton.className = 'edit-btn';
+                editButton.title = 'Editar';
+                editButton.addEventListener('click', () => {
+                    item.editing = !item.editing;
+                    renderItems();
+                });
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '🗑️';
+                deleteButton.className = 'delete-btn';
+                deleteButton.title = 'Excluir';
+                deleteButton.addEventListener('click', () => {
+                    courseItems = courseItems.filter(i => i.id !== item.id);
+                    updateChart();
+                    renderItems();
+                    saveCourseItems();
+                });
+                
+                // Add subitem button
+                const addSubitemButton = document.createElement('button');
+                addSubitemButton.innerHTML = '+';
+                addSubitemButton.className = 'add-subitem-btn';
+                addSubitemButton.title = 'Adicionar sub-item';
+                addSubitemButton.addEventListener('click', () => {
+                    // Toggle showing the add subitem form
+                    item.showAddSubitemForm = !item.showAddSubitemForm;
+                    renderItems();
+                });
+                
+                actionButtons.appendChild(editButton);
+                actionButtons.appendChild(deleteButton);
+                actionButtons.appendChild(addSubitemButton);
+                
+                // Status inputs (completed/total)
+                const statusInputs = document.createElement('div');
+                statusInputs.className = 'status-inputs';
+                
+                const completedInput = document.createElement('input');
+                completedInput.type = 'number';
+                completedInput.min = '0';
+                completedInput.value = item.completionValue || 0;
+                completedInput.className = 'status-input-small';
+                completedInput.addEventListener('change', () => {
+                    item.completionValue = parseInt(completedInput.value) || 0;
+                    updateChart();
+                    saveCourseItems();
+                });
+                
+                const totalInput = document.createElement('input');
+                totalInput.type = 'text';
+                totalInput.value = item.total || "Item";
+                totalInput.className = 'status-input-large';
+                totalInput.addEventListener('change', () => {
+                    item.total = totalInput.value;
+                    updateChart();
+                    saveCourseItems();
+                });
+                
+                statusInputs.appendChild(completedInput);
+                statusInputs.appendChild(totalInput);
+                
+                itemElement.appendChild(toggleButton);
+                itemElement.appendChild(checkbox);
+                itemElement.appendChild(itemText);
+                itemElement.appendChild(statusInputs);
+                itemElement.appendChild(actionButtons);
+                
+                itemsList.appendChild(itemElement);
+                
+                // Add subitem form if toggled
+                if (item.showAddSubitemForm) {
+                    const subitemForm = document.createElement('div');
+                    subitemForm.className = 'add-subitem-form';
+                    
+                    const subitemInput = document.createElement('input');
+                    subitemInput.type = 'text';
+                    subitemInput.placeholder = 'Digite o sub-item';
+                    
+                    const addSubitemBtn = document.createElement('button');
+                    addSubitemBtn.textContent = 'Adicionar';
+                    addSubitemBtn.addEventListener('click', () => {
+                        addSubitem(item.id, subitemInput.value);
+                        item.showAddSubitemForm = false;
+                    });
+                    
+                    subitemForm.appendChild(subitemInput);
+                    subitemForm.appendChild(addSubitemBtn);
+                    itemsList.appendChild(subitemForm);
+                    
+                    // Focus the input
+                    setTimeout(() => subitemInput.focus(), 0);
+                }
+                
+                // Render subitems if any and not collapsed
+                if (item.subitems && item.subitems.length > 0 && !item.collapsed) {
+                    const subitemsContainer = document.createElement('div');
+                    subitemsContainer.className = 'subitem-container';
+                    
+                    item.subitems.forEach(subitem => {
+                        const subitemElement = document.createElement('div');
+                        subitemElement.className = 'item subitem';
+                        
+                        const subCheckbox = document.createElement('input');
+                        subCheckbox.type = 'checkbox';
+                        subCheckbox.checked = subitem.completed;
+                        subCheckbox.addEventListener('change', () => {
+                            subitem.completed = subCheckbox.checked;
+                            saveCourseItems();
+                            renderItems();
+                        });
+                        
+                        const subitemText = document.createElement('div');
+                        subitemText.className = 'item-text';
+                        
+                        if (subitem.editing) {
+                            const editSubInput = document.createElement('input');
+                            editSubInput.type = 'text';
+                            editSubInput.value = subitem.text;
+                            editSubInput.style.width = '100%';
+                            editSubInput.addEventListener('keyup', (e) => {
+                                if (e.key === 'Enter') {
+                                    subitem.text = editSubInput.value;
+                                    subitem.editing = false;
+                                    renderItems();
+                                    saveCourseItems();
+                                }
+                            });
+                            subitemText.appendChild(editSubInput);
+                            setTimeout(() => editSubInput.focus(), 0);
+                        } else {
+                            subitemText.textContent = subitem.text;
+                        }
+                        
+                        const subitemActions = document.createElement('div');
+                        subitemActions.className = 'item-actions';
+                        
+                        const editSubButton = document.createElement('button');
+                        editSubButton.innerHTML = '✎';
+                        editSubButton.className = 'edit-btn';
+                        editSubButton.addEventListener('click', () => {
+                            subitem.editing = !subitem.editing;
+                            renderItems();
+                        });
+                        
+                        const deleteSubButton = document.createElement('button');
+                        deleteSubButton.innerHTML = '🗑️';
+                        deleteSubButton.className = 'delete-btn';
+                        deleteSubButton.addEventListener('click', () => {
+                            item.subitems = item.subitems.filter(s => s.id !== subitem.id);
+                            saveCourseItems();
+                            renderItems();
+                        });
+                        
+                        subitemActions.appendChild(editSubButton);
+                        subitemActions.appendChild(deleteSubButton);
+                        
+                        subitemElement.appendChild(subCheckbox);
+                        subitemElement.appendChild(subitemText);
+                        subitemElement.appendChild(subitemActions);
+                        
+                        subitemsContainer.appendChild(subitemElement);
+                    });
+                    
+                    itemsList.appendChild(subitemsContainer);
+                }
+            });
+        }
+
+        // Add a new item to the course list
+        function addItem(text) {
+            if (text.trim() === '') return;
+            
+            const newId = courseItems.length > 0 ? Math.max(...courseItems.map(item => item.id)) + 1 : 1;
+            
+            courseItems.push({
+                id: newId,
+                text: text,
+                completed: false,
+                editing: false,
+                total: "Item",
+                completionValue: 0,
+                subitems: [],
+                collapsed: false
+            });
+            
+            newItemInput.value = '';
+            updateChart();
+            renderItems();
+            saveCourseItems();
+        }
+
+        // Event Listeners
+        addButton.addEventListener('click', () => {
+            addItem(newItemInput.value);
+        });
+
+        newItemInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                addItem(newItemInput.value);
+            }
+        });
+        
+        // Save course notes
+        courseNotes.addEventListener('input', () => {
+            if (selectedItemId) {
+                localStorage.setItem(`courseNotes_${selectedItemId}`, courseNotes.value);
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMainItems();
+            initChart();
+            renderItems();
+            updateChart();
+        });
+
+        // Tooltip functionality for the chart
+        document.getElementById('courseChart').addEventListener('mousemove', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = `${e.clientX - rect.left + 10}px`;
+            tooltip.style.top = `${e.clientY - rect.top + 10}px`;
+        });
+    </script>
+</body>
+</html>
